@@ -4,8 +4,6 @@ import os
 
 # I'll be assuming that all things in a cellular automata simulation are just
 # numbers.
-# TODO: Maybe pre-cache neighborhoods to reduce computational load?
-# Should the conditions be assumed to be periodic?
 class CellularAutomata:
     def __init__(self, grid):
         self.grid = grid # TODO: get error handling for grids with a size greater than two
@@ -17,7 +15,9 @@ class CellularAutomata:
         return f"CellularAutomata ({self.grid[0]}x{self.grid[1]}) \n {self.state}"
     def __repr__(self):
         return f'CellularAutomata({self.grid})'
-
+    # TODO: change this to get rid of redundant updates (e.g. an updating the same
+    # cell twice), rather than just looking at the state of the grid, which should
+    # be handled when defining a rule
     def __is_redundant(self, update):
         i, j  = update[0]
         value = update[1]
