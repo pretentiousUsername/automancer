@@ -5,26 +5,38 @@ import os
 # I'll be assuming that all things in a cellular automata simulation are just
 # numbers.
 class CellularAutomata:
-    def __init__(self, grid):
+    def __init__(self, grid, **kwargs):
         self.grid = grid # TODO: get error handling for grids with a size greater than two
         self.state = np.zeros(grid)
         self.rules = [] # initialize a set of rules
         self.neighborhoods = []
+        self.baseline = kwargs.pop('baseline', 0)
 
     def __str__(self):
         return f"CellularAutomata ({self.grid[0]}x{self.grid[1]}) \n {self.state}"
     def __repr__(self):
         return f'CellularAutomata({self.grid})'
+
     # TODO: change this to get rid of redundant updates (e.g. an updating the same
     # cell twice), rather than just looking at the state of the grid, which should
     # be handled when defining a rule
-    def __is_redundant(self, update):
-        i, j  = update[0]
+    def __is_unchanged(self, update):
+        i, j = update[0]
         value = update[1]
-        if self.state[i, j] == value == 0:
+        if value == self.state[i, j]:
             return True
         else:
             return False
+
+    def __is_baseline(self, update):
+        if update[1] == self.baseline:
+            return True
+        else:
+            return False
+
+    #def __is_redundant(self, updates, update):
+
+
     # from https://pymorton.wordpress.com/2015/02/16/wrap-integer-values-to-fixed-range/
     def __keep_periodic(self, number, maximum):
         return (number) % (maximum)
@@ -77,10 +89,6 @@ class CellularAutomata:
             a = self.build_neighborhood(size - 1, shape)
             self.neighborhoods.append(a)
 
-    # woah, look at *this* complex method
-    def print_state(self):
-        print(self.state)
-
     def generate_picture(self, **kwargs):
         file = kwargs.pop('file', None)
         fig, ax = plt.subplots()
@@ -130,15 +138,27 @@ class CellularAutomata:
                     new_value = self.rules[k](self.state, neighborhood, point)
                     for value in new_value: # only works for an iterable with iterables---make this more robust
                         updates.append(value)
-
         spaghetti_list = [val for val in updates]
-        for update in spaghetti_list:
-            if self.__is_redundant(update):
-                updates.remove(update)
-            else:
-                pass
-        #print(updates)
+        
+        for a in spaghetti_list:
+            if self.__is_baseline(a) and self.__is_unchanged(a):
+                spaghetti_list.remove(a)
+
+        print(spaghetti_list)
         self.update(updates)
+
+    def time_evolution(self, steps = 10, **kwargs):
+        file = kwargs.pop('file', None)
+        time = range(0, steps - 1)
+        steps = []
+        for t in time:
+            steps.append(self.state)
+            self.evaluate_rules()
+            self.generate_picture()
+        if file == None:
+            return steps
+        else:
+            np.save(file, steps)
 
 
 
@@ -160,3 +180,26 @@ def random_walk(state, neighborhood, point):
 # rules and neighborhoods are associated, meaning that if you add a
 # neighborhood and then a rule, that rule will be evaluated with that
 # neighborhood.
+c1 = CellularAutomata((2, 2))
+
+def random_walk(state, neighborhood, point):
+    x, y = point
+    length = np.random.randint(0, len(neighborhood))
+    new_spot = neighborhood[length]
+    if state[x, y] == 1:
+        new_state = [new_spot, 1]
+        return [[point, 0], new_state]
+    elif state[x, y] == 0:
+        return [[point, 0]]
+    else: 
+        pass
+
+#c1.randomize_state()
+c1.update([((1, 1), 1)])
+print(c1.baseline)
+#c1.print_state()
+c1.add_rule(random_walk)
+c1.add_neighborhood(shape = 'v', size = 1)
+#c1.evaluate_rules()
+c1.time_evolution()
+#c1.print_state()
