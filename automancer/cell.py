@@ -140,6 +140,35 @@ class CellularAutomata:
         #print(updates)
         self.update(updates)
 
+    def time_evolution(self, steps = 10, **kwargs):
+        file = kwargs.pop('file', None)
+        evolution = []
+        time = range(0, steps)
+        for t in time:
+            evolution.append(self.state)
+            print(self.state)
+            self.evaluate_rules()
+        
+        if file == None:
+            return evolution
+        else:
+            np.save(file, evolution)
+
+    def generate_picture(self, **kwargs):
+        file = kwargs.pop('file', None)
+        fig, ax = plt.subplots()
+        
+        # this feels bad to write :|
+        x = np.arange(0, self.grid[0]) # REALLY mull over using `range` vs.
+        y = np.arange(0, self.grid[1]) # `np.arange`
+        z = self.state
+        ax.pcolormesh(x, y, z)
+        
+        if file != None:
+            plt.savefig(file)
+        else:
+            plt.show()
+
 
 
 # rules must have the state, neighborhood, and point evaluated in that order.
