@@ -28,6 +28,7 @@ glider_state = np.array([
     [1, 0, 1],
     [0, 1, 1]
     ])
+glider_state = np.flip(glider_state, axis = 1)
 
 game = CellularAutomata((20, 20))
 game.state[0:3, 0:3] = glider_state

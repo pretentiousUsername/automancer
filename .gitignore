@@ -1,3 +1,5 @@
 automancer/testing.py
 automancer/__pycache__/
 automancer/ani/
+automancer/initial_random_state.py
+automancer/raw_data/
