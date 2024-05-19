@@ -5,11 +5,15 @@ import os
 # I'll be assuming that all things in a cellular automata simulation are just
 # numbers.
 class CellularAutomata:
-    def __init__(self, grid):
-        self.grid = grid # TODO: get error handling for grids with a size greater than two
+    def __init__(self, grid, baseline = 0):
+        if len(grid) != 2:
+            raise ValueError("Grid must be iterable with length 2.")
+        else:
+            self.grid = grid # TODO: get error handling for grids with a size greater than two
         self.state = np.zeros(grid)
         self.rules = [] # initialize a set of rules
         self.neighborhoods = []
+        self.baseline = baseline
 
     def __str__(self):
         return f"CellularAutomata ({self.grid[0]}x{self.grid[1]}) \n {self.state}"
@@ -28,7 +32,9 @@ class CellularAutomata:
     # from https://pymorton.wordpress.com/2015/02/16/wrap-integer-values-to-fixed-range/
     def __keep_periodic(self, number, maximum):
         return (number) % (maximum)
-
+    
+    def set_state(self, state):
+        self.state = np.flip(state)
 
     # Is this really the best way to update the grid?
     # Anyways, this method is **fundamental**---don't get it spaghettified.
@@ -143,11 +149,12 @@ class CellularAutomata:
     def time_evolution(self, steps = 10, **kwargs):
         file = kwargs.pop('file', None)
         evolution = []
-        time = range(0, steps)
+        evolution.append(self.state)
+        time = np.arange(0, steps)
         for t in time:
-            evolution.append(self.state)
-            print(self.state)
             self.evaluate_rules()
+            evolution.append(self.state)
+            #print(self.state)
         
         if file == None:
             return evolution
@@ -168,6 +175,15 @@ class CellularAutomata:
             plt.savefig(file)
         else:
             plt.show()
+
+    def move_point(self, point, amount):
+        temp_state = np.zeros(self.grid)
+        temp_state[point] = self.state[point]
+        temp_state = np.roll(temp_state, shift = amount, axis = (1, 0))
+        new_point = tuple(np.argwhere(temp_state))
+        return [[point, 0], [new_point, state[point]]]
+
+    
 
 
 
