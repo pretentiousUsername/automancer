@@ -48,9 +48,9 @@ class CellularAutomata:
     # This method needs some serious refinement
     def build_neighborhood(self, size, shape = 'v'):
         size += 1
-        area = np.arange(-size, size + 1)
+        area = range(-size, size + 1) #range(-size, size + 1)
         neighborhood = []
-        if shape == 'v' or 'Von Neumann': # Von Neumann neighborhood
+        if shape == 'v' or shape == 'Von Neumann': # Von Neumann neighborhood
             for i in area:
                 for j in area:
                     if np.abs(i) + np.abs(j) <= size:
@@ -58,10 +58,10 @@ class CellularAutomata:
                         neighborhood.append(k)
                     else:
                         pass
-        elif shape == 'm' or 'Moore':
+        elif shape == 'm' or shape == 'Moore':
             for i in area:
                 for j in area:
-                   if np.abs(i) <= size and np.abs(j) <= size:
+                   if (np.abs(i) <= size) and (np.abs(j) <= size):
                        k = (i, j)
                        neighborhood.append(k)
                    else:
@@ -94,6 +94,8 @@ class CellularAutomata:
         # this feels bad to write :|
         x = np.arange(0, self.grid[0]) # REALLY mull over using `range` vs.
         y = np.arange(0, self.grid[1]) # `np.arange`
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
         z = self.state
         ax.pcolormesh(x, y, z)
         
@@ -126,24 +128,17 @@ class CellularAutomata:
             raise ValueError("The number of neighborhoods must equal the number of rules.")
         else:
             rule_range = range(0, num_rules)
-        for i in i_range: # oooooh I love me some nesting
-            for j in j_range:
-                for k in rule_range:
-                    neighborhood = [(self.__keep_periodic(i + neighbor[0], self.grid[0]),
-                                     self.__keep_periodic(j + neighbor[1], self.grid[1]))
-                                    for neighbor in self.neighborhoods[k]]
-                    point = (i, j)
-                    new_value = self.rules[k](self.state, neighborhood, point)
-                    for value in new_value: # only works for an iterable with iterables---make this more robust
-                        updates.append(value)
 
-        spaghetti_list = [val for val in updates]
-        for update in spaghetti_list:
-            if self.__is_redundant(update):
-                updates.remove(update)
-            else:
-                pass
-        #print(updates)
+        for n in rule_range:
+            neighborhood = self.neighborhoods[n]
+            rule         = self.rules[n]
+            for i in i_range:
+                for j in j_range:
+                    point = (i, j)
+                    new_value = rule(self.state, neighborhood, point)
+                    for v in new_value:
+                        updates.append(v)
+
         self.update(updates)
 
     def time_evolution(self, steps = 10, **kwargs):
@@ -154,7 +149,6 @@ class CellularAutomata:
         for t in time:
             self.evaluate_rules()
             evolution.append(self.state)
-            #print(self.state)
         
         if file == None:
             return evolution
@@ -176,30 +170,45 @@ class CellularAutomata:
         else:
             plt.show()
 
-    def move_point(self, point, amount):
-        temp_state = np.zeros(self.grid)
-        temp_state[point] = self.state[point]
-        temp_state = np.roll(temp_state, shift = amount, axis = (1, 0))
-        new_point = tuple(np.argwhere(temp_state))
-        return [[point, 0], [new_point, state[point]]]
+def move_point(state, point, amount):
+    temp_state = np.zeros(np.shape(state))
+    temp_state[point] = state[point]
+    if state[point] == 0:
+        return [[point, 0]]
+    elif state[point] == 1:
+        temp_state = np.roll(temp_state, shift = amount, axis = (0, 1))
+        new_point = np.argwhere(temp_state)
+        update = [[point, 0]]
+        for p in new_point:
+            update.append([tuple(p), 1])
+        return update
 
+def count_neighbors(state, point, neighborhood):
+    neighborhood = [n for n in neighborhood if n != (0, 0)]
+    neighbors = 0
+    for n in neighborhood:
+        temp_state = np.roll(state, shift = n, axis = (0, 1))
+        neighbors += temp_state[point]
+    return neighbors
     
 
 
 
 # rules must have the state, neighborhood, and point evaluated in that order.
 # rule must output a list of the form [[(i, j), value]]
-def random_walk(state, neighborhood, point):
-    x, y = point
-    length = np.random.randint(0, len(neighborhood))
-    new_spot = neighborhood[length]
-    if state[x, y] == 1:
-        new_state = [new_spot, 1]
-        return [[point, 0], new_state]
-    elif state[x, y] == 0:
-        return [[point, 0]]
-    else: 
-        pass
+def game_of_life(state, neighborhood, point):
+    neighbors = count_neighbors(state, point, neighborhood)
+    if state[point] == 1:
+        if neighbors < 2 or neighbors > 3:
+            return [(point, 0)]
+        elif neighbors == 2 or neighbors == 3:
+            return [(point, 1)]
+    elif state[point] == 0:
+        if neighbors == 3:
+            return [(point, 1)]
+        else:
+            return [(point, 0)]
+
 
 
 # rules and neighborhoods are associated, meaning that if you add a
