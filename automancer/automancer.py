@@ -186,7 +186,7 @@ def move_point(state, point, amount):
             update.append([tuple(p), 1])
         return update
 
-def count_neighbors(state, point, neighborhood):
+def count_neighbors(state, neighborhood, point):
     neighborhood = [n for n in neighborhood if n != (0, 0)]
     neighbors = 0
     for n in neighborhood:
@@ -197,7 +197,7 @@ def count_neighbors(state, point, neighborhood):
 # rules must have the state, neighborhood, and point evaluated in that order.
 # rule must output a list of the form [[(i, j), value]]
 def game_of_life(state, neighborhood, point):
-    neighbors = count_neighbors(state, point, neighborhood)
+    neighbors = count_neighbors(state, neighborhood, point)
     if state[point] == 1:
         if neighbors < 2 or neighbors > 3:
             return [(point, 0)]
