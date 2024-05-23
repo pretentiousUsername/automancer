@@ -6,3 +6,4 @@
       the grid, which should be handled when defining a rule.
 + [ ] Find a way to get rid of redundancies while not messing up the state.
 + [ ] Generate animations.
++ [ ] Package this and put it on the PyPi.
