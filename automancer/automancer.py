@@ -32,7 +32,6 @@ class CellularAutomata:
         else:
             return False
 
-    # from https://pymorton.wordpress.com/2015/02/16/wrap-integer-values-to-fixed-range/
     def __keep_periodic(self, number, maximum):
         return (number) % (maximum)
 
@@ -107,6 +106,8 @@ class CellularAutomata:
         else:
             plt.show()
 
+        plt.close()
+
     def add_rule(self, rule):
         if type(rule) is str:
             raise TypeError("Input rule must be a function.")
@@ -168,7 +169,7 @@ class CellularAutomata:
         z = self.state
         ax.pcolormesh(x, y, z)
 
-        if file != None:
+        if file is not None:
             plt.savefig(file)
         else:
             plt.show()
@@ -176,6 +177,11 @@ class CellularAutomata:
     def energy(self):
         return np.sum(self.state)
 
+
+class IsingMetropolis(CellularAutomata):
+    def __init__(self, grid, J=1.0, baseline=0):
+        CellularAutomata.__init__(self, grid, baseline=0)
+        self.J = J
 
 def move_point(state, point, amount):
     temp_state = np.zeros(np.shape(state))
@@ -214,8 +220,6 @@ def game_of_life(state, neighborhood, point):
             return [(point, 1)]
         else:
             return [(point, 0)]
-
-
 
 # rules and neighborhoods are associated, meaning that if you add a
 # neighborhood and then a rule, that rule will be evaluated with that
