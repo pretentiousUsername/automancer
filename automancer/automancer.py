@@ -179,9 +179,28 @@ class CellularAutomata:
 
 
 class IsingMetropolis(CellularAutomata):
-    def __init__(self, grid, J=1.0, baseline=0):
+    def __init__(self, grid, J=1.0):
         CellularAutomata.__init__(self, grid, baseline=0)
         self.J = J
+        self.set_state(self.generate_random_state())
+        self.add_neighborhood(shape="v", size=1)
+
+    def metropolis(self):
+        pass
+
+    def hamiltonian(self):
+        pass
+
+    def magnetization(self):
+        return np.sum(self.state, axis=(0, 1))
+
+
+    def generate_random_state(self):
+        rng = np.random.default_rng()
+        spins = np.array([-1, 1])
+        state = rng.choice(spins, self.grid)
+        return state
+
 
 def move_point(state, point, amount):
     temp_state = np.zeros(np.shape(state))
