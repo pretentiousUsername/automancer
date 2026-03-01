@@ -186,14 +186,13 @@ class IsingMetropolis(CellularAutomata):
         self.add_neighborhood(shape="v", size=1)
 
     def metropolis(self):
-        pass
+        ...
 
     def hamiltonian(self):
-        pass
+        ...
 
     def magnetization(self):
         return np.sum(self.state, axis=(0, 1))
-
 
     def generate_random_state(self):
         rng = np.random.default_rng()
