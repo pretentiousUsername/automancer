@@ -1,9 +1,13 @@
 # TODO
 + [X] Define a rule for Conway's game of life.
 + [X] (`line 5`) Get error handling for grids with a size greater than two.
-+ [ ] (`line 18`) Change `__is_redundant` to get rid of redundant updates (e.g.
++ [X] (`line 18`) Change `__is_redundant` to get rid of redundant updates (e.g.
       updating the same cell twice), rather than just looking at the state of
       the grid, which should be handled when defining a rule.
+
+      - > Unnecessary, as redundancy should be defined by rules.
+
 + [ ] Find a way to get rid of redundancies while not messing up the state.
 + [ ] Generate animations.
 + [ ] Package this and put it on the PyPi.
++ [ ] Write documentation.
