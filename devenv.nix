@@ -24,6 +24,7 @@
   enterShell = ''
     # hello         # Run scripts directly
     # git --version # Use packages
+    source .devenv/state/venv/bin/activate
   '';
 
   # https://devenv.sh/tasks/

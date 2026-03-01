@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from .neighborhood import *  # I know that this isn't the best way to do it.
 
 
 # I'll be assuming that all things in a cellular automata simulation are just
